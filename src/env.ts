@@ -1,4 +1,4 @@
 export const NAVER_MAP_CLIENT_ID = ""
-export const KAKAO_SDK_JS_KEY = "3e0929bbec4eb0b003f0e15a5b6b7485"
+export const KAKAO_SDK_JS_KEY = "05d8e76b5c93420c244260956d5fc4c1"
 export const SERVER_URL = "https://wedding-notice-server.onrender.com/api"
 export const STATIC_ONLY = false
