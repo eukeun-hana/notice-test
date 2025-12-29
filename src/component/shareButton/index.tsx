@@ -40,8 +40,14 @@ export const ShareButton = () => {
                 "/preview_image.png",
               link: {
                 mobileWebUrl:
+                  window.location.protocol +
+                  "//" +
+                  window.location.host +
                   baseUrl,
                 webUrl:
+                  window.location.protocol +
+                  "//" +
+                  window.location.host +
                   baseUrl,
               },
             },
@@ -50,9 +56,15 @@ export const ShareButton = () => {
                 title: "알림장 보기",
                 link: {
                   mobileWebUrl:
-                    baseUrl,
+                    window.location.protocol +
+                  "//" +
+                  window.location.host +
+                  baseUrl,
                   webUrl:
-                    baseUrl,
+                    window.location.protocol +
+                  "//" +
+                  window.location.host +
+                  baseUrl,
                 },
               },
             ],
