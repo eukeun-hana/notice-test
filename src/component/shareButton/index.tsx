@@ -27,13 +27,11 @@ export const ShareButton = () => {
           }
 
           kakao.Share.sendDefault({
-            objectType: "location",
-            address: SHARE_ADDRESS,
-            addressTitle: SHARE_ADDRESS_TITLE,
+            objectType: "feed",
             content: {
-              title: `${GROOM_FULLNAME} ❤️ ${BRIDE_FULLNAME}의 결혼식에 초대합니다.`,
+              title: `${GROOM_FULLNAME} ❤️ ${BRIDE_FULLNAME} 결혼합니다.`,
               description:
-                WEDDING_DATE.format(WEDDING_DATE_FORMAT) + "\n" + LOCATION,
+                WEDDING_DATE.format(WEDDING_DATE_FORMAT),
               imageUrl:
                 window.location.protocol +
                 "//" +
@@ -42,30 +40,18 @@ export const ShareButton = () => {
                 "/preview_image.png",
               link: {
                 mobileWebUrl:
-                  window.location.protocol +
-                  "//" +
-                  window.location.host +
                   baseUrl,
                 webUrl:
-                  window.location.protocol +
-                  "//" +
-                  window.location.host +
                   baseUrl,
               },
             },
             buttons: [
               {
-                title: "초대장 보기",
+                title: "알림장 보기",
                 link: {
                   mobileWebUrl:
-                    window.location.protocol +
-                    "//" +
-                    window.location.host +
                     baseUrl,
                   webUrl:
-                    window.location.protocol +
-                    "//" +
-                    window.location.host +
                     baseUrl,
                 },
               },
