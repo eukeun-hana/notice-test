@@ -4,6 +4,8 @@ import { Invitation } from "./component/invitation"
 import { Calendar } from "./component/calendar"
 import { Gallery } from "./component/gallery"
 import { LazyDiv } from "./component/lazyDiv"
+import { GuestBook } from "./component/guestBook"
+  
 import { ShareButton } from "./component/shareButton"
 import { STATIC_ONLY } from "./env"
 
@@ -22,7 +24,7 @@ function App() {
         <LazyDiv className="card-group">
           {/* 결혼식 날짜 (달력) 
           <Calendar />*/}
-
+         {!STATIC_ONLY && <GuestBook />}
           {/* 겔러리 */}
           <Gallery />
         </LazyDiv>
