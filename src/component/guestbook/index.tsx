@@ -1,123 +1,188 @@
-import { useEffect, useState } from "react"
-import dayjs from "dayjs"
-
+import { useEffect, useState } from "react";
 import {
-  collection,
   addDoc,
+  collection,
+  deleteDoc,
+  doc,
   getDocs,
-  query,
   orderBy,
-  limit,
+  query,
   serverTimestamp,
-} from "firebase/firestore"
-import { db } from "../../firebase"
+} from "firebase/firestore";
+import { db } from "../../firebase";
 
-type Post = {
-  id: string
-  name: string
-  content: string
-  createdAt: number
+interface GuestBookItem {
+  id: string;
+  name: string;
+  message: string;
+  password: string;
+  createdAt?: any;
 }
 
 export default function GuestBook() {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [name, setName] = useState("")
-  const [content, setContent] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [guestbooks, setGuestbooks] = useState<GuestBookItem[]>([]);
+  const [openForm, setOpenForm] = useState(false);
+
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   /** 방명록 불러오기 */
-  const loadPosts = async () => {
+  const fetchGuestbooks = async () => {
     const q = query(
       collection(db, "guestbook"),
-      orderBy("createdAt", "desc"),
-      limit(3),
-    )
+      orderBy("createdAt", "desc")
+    );
+    const snapshot = await getDocs(q);
 
-    const snapshot = await getDocs(q)
+    const data: GuestBookItem[] = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Omit<GuestBookItem, "id">),
+    }));
 
-    const list: Post[] = snapshot.docs.map((doc) => {
-      const data = doc.data() as any
-
-      return {
-        id: doc.id,
-        name: data.name ?? "",
-        content: data.content ?? "",
-        createdAt: data.createdAt?.seconds ?? 0,
-      }
-    })
-
-    setPosts(list)
-  }
-
-  /** 방명록 저장 */
-  const submitGuestBook = async () => {
-    if (!name.trim() || !content.trim()) {
-      alert("이름과 내용을 입력해주세요")
-      return
-    }
-
-    if (loading) return
-
-    try {
-      setLoading(true)
-
-      await addDoc(collection(db, "guestbook"), {
-        name,
-        content,
-        createdAt: serverTimestamp(),
-      })
-
-      setName("")
-      setContent("")
-      await loadPosts()
-
-      alert("방명록이 등록되었습니다 💍")
-    } catch (e) {
-      alert("저장 중 오류가 발생했습니다")
-    } finally {
-      setLoading(false)
-    }
-  }
+    setGuestbooks(data);
+  };
 
   useEffect(() => {
-    loadPosts()
-  }, [])
+    fetchGuestbooks();
+  }, []);
+
+  /** 방명록 저장 */
+  const handleSubmit = async () => {
+    if (!name || !message || !password) {
+      alert("이름, 내용, 비밀번호를 모두 입력해주세요.");
+      return;
+    }
+
+    const newItem = {
+      name,
+      message,
+      password,
+      createdAt: serverTimestamp(),
+    };
+
+    // ✅ UX 유지: 먼저 화면에 추가
+    setGuestbooks((prev) => [
+      { id: Math.random().toString(), ...newItem },
+      ...prev,
+    ]);
+
+    // 입력창 초기화
+    setName("");
+    setMessage("");
+    setPassword("");
+    setOpenForm(false);
+
+    try {
+      await addDoc(collection(db, "guestbook"), newItem);
+      fetchGuestbooks(); // 실제 ID 동기화
+    } catch (e) {
+      console.error(e);
+      alert("저장 중 오류가 발생했습니다.");
+    }
+  };
+
+  /** 방명록 삭제 */
+  const handleDelete = async (item: GuestBookItem) => {
+    if (!deletePassword) {
+      alert("비밀번호를 입력해주세요.");
+      return;
+    }
+
+    if (deletePassword !== item.password) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, "guestbook", item.id));
+      setGuestbooks((prev) => prev.filter((g) => g.id !== item.id));
+      setDeletePassword("");
+      setDeleteTargetId(null);
+    } catch (e) {
+      console.error(e);
+      alert("삭제 중 오류가 발생했습니다.");
+    }
+  };
 
   return (
-    <div>
+    <div className="guestbook-wrapper">
       <h2>방명록</h2>
 
-      {/* 작성 영역 */}
-      <div>
-        <input
-          placeholder="이름"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <textarea
-          placeholder="축하 메시지를 남겨주세요"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-        <button onClick={submitGuestBook} disabled={loading}>
-          {loading ? "등록 중..." : "방명록 남기기"}
-        </button>
-      </div>
+      {/* 방명록 남기기 버튼 */}
+      <button
+        className="guestbook-open-btn"
+        onClick={() => setOpenForm((prev) => !prev)}
+      >
+        방명록 남기기
+      </button>
 
-      {/* 목록 */}
-      <ul>
-        {posts.map((post) => (
-          <li key={post.id}>
-            <div>
-              <strong>{post.name}</strong>
-              <span style={{ marginLeft: 8, fontSize: 12 }}>
-                {dayjs.unix(post.createdAt).format("YYYY.MM.DD HH:mm")}
-              </span>
+      {/* 작성 폼 */}
+      {openForm && (
+        <div className="guestbook-form">
+          <input
+            type="text"
+            placeholder="이름"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <textarea
+            placeholder="내용"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="비밀번호"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button onClick={handleSubmit}>저장</button>
+        </div>
+      )}
+
+      {/* 방명록 목록 */}
+      <ul className="guestbook-list">
+        {guestbooks.map((item) => (
+          <li key={item.id} className="guestbook-item">
+            <div className="guestbook-content">
+              <strong>{item.name}</strong>
+              <p>{item.message}</p>
             </div>
-            <p>{post.content}</p>
+
+            {/* 삭제 영역 */}
+            {deleteTargetId === item.id ? (
+              <div className="guestbook-delete">
+                <input
+                  type="password"
+                  placeholder="비밀번호"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                />
+                <button onClick={() => handleDelete(item)}>삭제</button>
+                <button
+                  onClick={() => {
+                    setDeleteTargetId(null);
+                    setDeletePassword("");
+                  }}
+                >
+                  취소
+                </button>
+              </div>
+            ) : (
+              <button
+                className="guestbook-delete-btn"
+                onClick={() => setDeleteTargetId(item.id)}
+              >
+                삭제
+              </button>
+            )}
           </li>
         ))}
       </ul>
     </div>
-  )
+  );
 }
