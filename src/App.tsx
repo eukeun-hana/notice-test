@@ -4,7 +4,7 @@ import { Invitation } from "./component/invitation"
 import { Calendar } from "./component/calendar"
 import { Gallery } from "./component/gallery"
 import { LazyDiv } from "./component/lazyDiv"
-import { GuestBook } from "./component/guestbook"
+import GuestBook from "./component/guestbook"
 import { ShareButton } from "./component/shareButton"
 import { STATIC_ONLY } from "./env"
 
