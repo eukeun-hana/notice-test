@@ -7,11 +7,16 @@ import { LazyDiv } from "./component/lazyDiv"
 import GuestBook from "./component/guestbook"
 import { ShareButton } from "./component/shareButton"
 import { STATIC_ONLY } from "./env"
+import { BGM } from "./component/bgm"
 
 function App() {
   return (
+    <>
+    <BGM />
     <div className="background">
+      
       <div className="card-view">
+        
         <LazyDiv className="card-group">
           {/* 표지 */}
           <Cover />
@@ -30,8 +35,12 @@ function App() {
           
         </LazyDiv>
         <ShareButton />
+        
       </div>
     </div>
+    </>
+    
+    
   )
 }
 

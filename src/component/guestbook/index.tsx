@@ -33,7 +33,7 @@ export default function GuestBook() {
     const q = query(
       collection(db, "guestbook"),
       orderBy("createdAt", "desc"),
-      limit(3),
+      limit(4),
     )
 
     const snap = await getDocs(q)
